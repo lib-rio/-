@@ -159,7 +159,7 @@
 
 <script>
     // ★先ほど取得したGASのウェブアプリURLをここに貼り付けてください
-    const GAS_URL = "https://script.google.com/macros/s/AKfycby_NgvODYoWWp2zmRzaAGJoy38tkbVYt8u3pbEyG94n6sW0QAA6u5U3WJ-MR0oLz5g2FQ/exec";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbyonUyC4wu4P0GuesTZkPyXjO25WNpzbLWapYSd7cwi4E0Z1uoO_oty_y5J1nDvaixI_g/exec";
 
     // 1. ローカルストレージから前回入力を復元
     window.addEventListener('DOMContentLoaded', () => {
@@ -239,8 +239,14 @@
                     }
                 },
                 decoder : {
-                    readers : ["code_128_reader", "ean_reader", "ean_8_reader"] // 一般的な図書バーコード形式
-                }
+    readers : [
+        "code_39_reader", 
+        "codabar_reader", 
+        "code_128_reader", 
+        "ean_reader", 
+        "ean_8_reader"
+    ]
+}
             }, function(err) {
                 if (err) {
                     console.log(err);
