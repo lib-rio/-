@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>病院図書室 簡易貸出システム</title>
+    <!-- スマホで見やすいように大きめ文字＆さわやかなフォント・デザイン -->
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f0f7f4;
+            color: #2c3e50;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 450px;
+            box-sizing: border-box;
+        }
+        h2 {
+            color: #2e7d32;
+            text-align: center;
+            font-size: 1.4rem;
+            margin-top: 0;
+        }
+        p.desc {
+            font-size: 0.95rem;
+            color: #555;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-bottom: 6px;
+            color: #333;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1rem;
+            border: 2px solid #c8e6c9;
+            border-radius: 8px;
+            box-sizing: border-box;
+            background-color: #fafafa;
+        }
+        input:focus {
+            border-color: #4caf50;
+            outline: none;
+            background-color: #fff;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            background-color: #4caf50;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: background 0.2s;
+        }
+        button:hover {
+            background-color: #388e3c;
+        }
+        .secondary-btn {
+            background-color: #ff9800;
+            margin-top: 10px;
+        }
+        .secondary-btn:hover {
+            background-color: #f57c00;
+        }
+        #interactive {
+            width: 100%;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            display: none;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .success-box {
+            text-align: center;
+            padding: 20px 0;
+        }
+        .success-box h3 {
+            color: #2e7d32;
+            font-size: 1.5rem;
+        }
+    </style>
+    <!-- バーコード読み取りライブラリ (QuaggaJS) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+</head>
+<body>
+
+<div class="container" id="main-container">
+    <h2>🏥 病院図書室 簡易貸出</h2>
+    <p class="desc">本棚のバーコードを読み取って簡単借用！</p>
+
+    <div id="form-view">
+        <form id="checkout-form">
+            <div class="form-group">
+                <label for="shozoku">所属（部署・役職など）</label>
+                <input type="text" id="shozoku" required placeholder="例：看護部 / 薬剤部">
+            </div>
+
+            <div class="form-group">
+                <label for="shimei">お名前</label>
+                <input type="text" id="shimei" required placeholder="例：山田 花子">
+            </div>
+
+            <div class="form-group">
+                <label for="email">メールアドレス</label>
+                <input type="email" id="email" required placeholder="example@hospital.or.jp">
+            </div>
+
+            <div class="form-group">
+                <label for="shiryobangou">資料番号（7桁バーコード）</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="shiryobangou" required placeholder="例：1234567" style="flex: 1;">
+                    <button type="button" id="scan-btn" style="width: auto; padding: 0 15px; font-size: 1rem; background-color: #0288d1;">📷 カメラ読取</button>
+                </div>
+            </div>
+
+            <!-- カメラ描画エリア -->
+            <div id="interactive" class="viewport"></div>
+
+            <div class="form-group">
+                <label for="memo">メモ（任意）</label>
+                <input type="text" id="memo" placeholder="特記事項があれば入力">
+            </div>
+
+            <button type="submit" id="submit-btn">借用を申し込む</button>
+        </form>
+    </div>
+
+    <!-- 完了画面 -->
+    <div id="success-view" class="success-box hidden">
+        <h3>✨ 借用を受け付けました！</h3>
+        <p>ご登録のメールアドレスに控えが送信され、図書室の管理システムに記録されました。</p>
+        <button type="button" id="next-btn" class="secondary-btn">続けて借用する</button>
+    </div>
+</div>
+
+<script>
+    // ★先ほど取得したGASのウェブアプリURLをここに貼り付けてください
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbza8EyvDnl0IbaKSFlHCxetduYK2j8a_N16NqVXmLJRA-J4gDKcOECjYF4SEhsPlCaCFw/exec";
+
+    // 1. ローカルストレージから前回入力を復元
+    window.addEventListener('DOMContentLoaded', () => {
+        if (localStorage.getItem('lib_shozoku')) document.getElementById('shozoku').value = localStorage.getItem('lib_shozoku');
+        if (localStorage.getItem('lib_shimei')) document.getElementById('shimei').value = localStorage.getItem('lib_shimei');
+        if (localStorage.getItem('lib_email')) document.getElementById('email').value = localStorage.getItem('lib_email');
+    });
+
+    // 2. フォーム送信処理
+    document.getElementById('checkout-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const shozoku = document.getElementById('shozoku').value;
+        const shimei = document.getElementById('shimei').value;
+        const email = document.getElementById('email').value;
+        const shiryobangou = document.getElementById('shiryobangou').value;
+        const memo = document.getElementById('memo').value;
+
+        // 次回のためにローカルストレージに保存
+        localStorage.setItem('lib_shozoku', shozoku);
+        localStorage.setItem('lib_shimei', shimei);
+        localStorage.setItem('lib_email', email);
+
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = "送信中...";
+
+        // GASへ送信
+        fetch(GAS_URL, {
+            method: "POST",
+            mode: "no-cors", // GASのCORS制限回避用
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                shozoku: shozoku,
+                shimei: shimei,
+                email: email,
+                shiryobangou: shiryobangou,
+                memo: memo
+            })
+        }).then(() => {
+            // 送信完了画面へ切り替え
+            document.getElementById('form-view').classList.add('hidden');
+            document.getElementById('success-view').classList.remove('hidden');
+            submitBtn.disabled = false;
+            submitBtn.textContent = "借用を申し込む";
+        }).catch(error => {
+            alert("送信に失敗しました。通信環境をご確認ください。");
+            submitBtn.disabled = false;
+            submitBtn.textContent = "借用を申し込む";
+        });
+    });
+
+    // 3. 「続けて借用する」ボタン
+    document.getElementById('next-btn').addEventListener('click', function() {
+        document.getElementById('shiryobangou').value = "";
+        document.getElementById('memo').value = "";
+        document.getElementById('success-view').classList.add('hidden');
+        document.getElementById('form-view').classList.remove('hidden');
+    });
+
+    // 4. カメラによるバーコード読み取り (QuaggaJS連携)
+    let scannerActive = false;
+    document.getElementById('scan-btn').addEventListener('click', function() {
+        const interactiveDiv = document.getElementById('interactive');
+        if (!scannerActive) {
+            interactiveDiv.style.display = 'block';
+            scannerActive = true;
+            Quagga.init({
+                inputStream : {
+                    name : "Live",
+                    type : "LiveStream",
+                    target: interactiveDiv,
+                    constraints: {
+                        facingMode: "environment" // 外側カメラを使用
+                    }
+                },
+                decoder : {
+                    readers : ["code_128_reader", "ean_reader", "ean_8_reader"] // 一般的な図書バーコード形式
+                }
+            }, function(err) {
+                if (err) {
+                    console.log(err);
+                    alert("カメラを起動できませんでした。ブラウザのカメラ権限をご確認ください。");
+                    scannerActive = false;
+                    interactiveDiv.style.display = 'none';
+                    return;
+                }
+                Quagga.start();
+            });
+
+            Quagga.onDetected(function(result) {
+                const code = result.codeResult.code;
+                if(code) {
+                    document.getElementById('shiryobangou').value = code;
+                    // 読み取ったら自動で停止
+                    Quagga.stop();
+                    interactiveDiv.style.display = 'none';
+                    scannerActive = false;
+                }
+            });
+        } else {
+            Quagga.stop();
+            interactiveDiv.style.display = 'none';
+            scannerActive = false;
+        }
+    });
+</script>
+
+</body>
+</html>
