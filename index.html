@@ -83,11 +83,12 @@
         .secondary-btn:hover {
             background-color: #f57c00;
         }
-        /* ★カメラ描画エリアのサイズをすっきりコンパクトに調整 */
+        
+        /* カメラ描画エリア ＆ 照準フレームのスタイリング */
         #interactive {
             position: relative;
             width: 100%;
-            height: 220px; 
+            height: 240px; 
             margin-bottom: 15px;
             border-radius: 8px;
             overflow: hidden;
@@ -104,6 +105,32 @@
             top: 0;
             left: 0;
         }
+        /* 中央の照準枠（ガイド） */
+        .scanner-guide {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 80px;
+            border: 2px dashed #ff5252;
+            box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.4); /* 周囲を少し暗くしてバーコードを際立たせる */
+            pointer-events: none;
+            z-index: 10;
+            border-radius: 4px;
+        }
+        .scanner-guide-text {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: #fff;
+            font-size: 0.8rem;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            z-index: 11;
+            pointer-events: none;
+        }
+
         .hidden {
             display: none !important;
         }
@@ -150,8 +177,11 @@
                 </div>
             </div>
 
-            <!-- カメラ描画エリア -->
-            <div id="interactive" class="viewport"></div>
+            <!-- カメラ描画エリア ＆ 照準ガイド -->
+            <div id="interactive" class="viewport">
+                <div class="scanner-guide"></div>
+                <div class="scanner-guide-text">この枠内にバーコードを合わせてください</div>
+            </div>
 
             <div class="form-group">
                 <label for="memo">メモ（任意）</label>
@@ -245,25 +275,25 @@
                     target: interactiveDiv,
                     constraints: {
                         facingMode: "environment",
-                        width: { ideal: 640 },
-                        height: { ideal: 480 }
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
                     }
                 },
                 decoder : {
                     readers : [
-                        "code_39_reader" // Code39に特化して精度を高める
+                        "code_39_reader"
                     ]
                 },
                 locator: {
-                    patchSize: "medium",
-                    halfSample: true
+                    patchSize: "large",
+                    halfSample: false
                 },
                 numOfWorkers: 2,
                 locate: true
             }, function(err) {
                 if (err) {
                     console.log(err);
-                    alert("カメラを起動できませんでした。ブラウザのカメラ権限をご確認ください。");
+                    alert("カメラを起動できませんでした。「許可する」を選択して再度おためしください。");
                     scannerActive = false;
                     interactiveDiv.style.display = 'none';
                     return;
@@ -274,9 +304,8 @@
             Quagga.onDetected(function(result) {
                 let code = result.codeResult.code;
                 if(code) {
-                    // もしアスタリスクが含まれていた場合、必要に応じて取り除く処理（通常はそのままか、trim等）
-                    // 例: *70012345* のように両端にある場合をスッキリさせる処理
-                    code = code.replace(/^\*|\*$/g, ''); // 両端の * を削除する場合
+                    // 両端のアスタリスクを取り除く
+                    code = code.replace(/^\*|\*$/g, '');
 
                     document.getElementById('shiryobangou').value = code;
                     Quagga.stop();
