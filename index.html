@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>病院図書室 簡易貸出システム</title>
-    <!-- スマホで見やすいように大きめ文字＆さわやかなフォント・デザイン -->
+    <title>がんセンター新潟病院図書室 スマホ貸出</title>
     <style>
         body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Noto Sans JP', 'Helvetica Neue', Arial, sans-serif;
             background-color: #f0f7f4;
             color: #2c3e50;
             margin: 0;
@@ -109,31 +108,31 @@
 <body>
 
 <div class="container" id="main-container">
-    <h2>🏥 病院図書室 簡易貸出</h2>
-    <p class="desc">本棚のバーコードを読み取って簡単借用！</p>
+    <h2>がんセンター新潟病院図書室</h2>
+    <p class="desc">バーコードを読み取って簡単貸出📱</p>
 
     <div id="form-view">
         <form id="checkout-form">
             <div class="form-group">
-                <label for="shozoku">所属（部署・役職など）</label>
-                <input type="text" id="shozoku" required placeholder="例：看護部 / 薬剤部">
+                <label for="shozoku">所属部署</label>
+                <input type="text" id="shozoku" required placeholder="例：○○科, ○○病棟, など">
             </div>
 
             <div class="form-group">
                 <label for="shimei">お名前</label>
-                <input type="text" id="shimei" required placeholder="例：山田 花子">
+                <input type="text" id="shimei" required placeholder="例：がんセン 花子">
             </div>
 
             <div class="form-group">
                 <label for="email">メールアドレス</label>
-                <input type="email" id="email" required placeholder="example@hospital.or.jp">
+                <input type="email" id="email" required placeholder="例：○○○○○@niigata-cc.jp">
             </div>
 
             <div class="form-group">
-                <label for="shiryobangou">資料番号（7桁バーコード）</label>
+                <label for="shiryobangou">資料番号（7桁のバーコード番号）</label>
                 <div style="display: flex; gap: 8px;">
-                    <input type="text" id="shiryobangou" required placeholder="例：1234567" style="flex: 1;">
-                    <button type="button" id="scan-btn" style="width: auto; padding: 0 15px; font-size: 1rem; background-color: #0288d1;">📷 カメラ読取</button>
+                    <input type="text" id="shiryobangou" required placeholder="例：10012345" style="flex: 1;">
+                    <button type="button" id="scan-btn" style="width: auto; padding: 0 15px; font-size: 0.8rem; background-color: #0288d1;">📷カメラでスキャン</button>
                 </div>
             </div>
 
@@ -142,24 +141,23 @@
 
             <div class="form-group">
                 <label for="memo">メモ（任意）</label>
-                <input type="text" id="memo" placeholder="特記事項があれば入力">
+                <input type="text" id="memo" placeholder="特記事項があれば入力してください">
             </div>
 
-            <button type="submit" id="submit-btn">借用を申し込む</button>
+            <button type="submit" id="submit-btn">借りる！</button>
         </form>
     </div>
 
     <!-- 完了画面 -->
     <div id="success-view" class="success-box hidden">
-        <h3>✨ 借用を受け付けました！</h3>
-        <p>ご登録のメールアドレスに控えが送信され、図書室の管理システムに記録されました。</p>
-        <button type="button" id="next-btn" class="secondary-btn">続けて借用する</button>
+        <h3>✨借用を受け付けました✨</h3>
+        <p>入力されたメールアドレスに控えが送信されました。</p>        <button type="button" id="next-btn" class="secondary-btn">続けて借用する</button>
     </div>
 </div>
 
 <script>
     // ★先ほど取得したGASのウェブアプリURLをここに貼り付けてください
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbzCIvXUIZVsdeMqEeL2rK9eUZ5qiya71mQKeax5tiXKeL1bOaqMhh0ARDMpLM49JgWUdg/exec";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbwMUaTvd3pmE4nox4hGcS3UpEBBqiuMmV2YjSBbC5lH5wmPH25eHB61FF9uuXo9ggqG/exec";
 
     // 1. ローカルストレージから前回入力を復元
     window.addEventListener('DOMContentLoaded', () => {
