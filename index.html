@@ -114,7 +114,7 @@
             width: 80%;
             height: 80px;
             border: 2px dashed #ff5252;
-            box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.4); /* 周囲を少し暗くしてバーコードを際立たせる */
+            box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.4);
             pointer-events: none;
             z-index: 10;
             border-radius: 4px;
@@ -175,7 +175,7 @@
                     <input type="text" id="shiryobangou" required placeholder="例：10012345" style="flex: 1;">
                     <button type="button" id="scan-btn" style="width: auto; padding: 0 15px; font-size: 0.8rem; background-color: #0288d1;">📷カメラでスキャン</button>
                 </div>
-                <!-- ★書名表示エリア（背景白、緑の点線、フッター並みの小さめサイズ） -->
+                <!-- 書名表示エリア -->
                 <div id="shomei-display" style="margin-top: 6px; padding: 6px 10px; background: #ffffff; border: 1px dashed #4caf50; border-radius: 6px; font-size: 0.75rem; color: #555; display: none;">
                     書名：未取得
                 </div>
@@ -261,7 +261,13 @@
     document.getElementById('next-btn').addEventListener('click', function() {
         document.getElementById('shiryobangou').value = "";
         document.getElementById('memo').value = "";
-        document.getElementById('shomei-display.style.display = 'none';"); // 念のため非表示化
+        
+        // ★修正済みの正しい非表示処理
+        const shomeiDisplay = document.getElementById('shomei-display');
+        if(shomeiDisplay) {
+            shomeiDisplay.style.display = 'none';
+        }
+
         document.getElementById('success-view').classList.add('hidden');
         document.getElementById('form-view').classList.remove('hidden');
     });
@@ -315,7 +321,6 @@
             Quagga.onDetected(function(result) {
                 let code = result.codeResult.code;
                 if(code) {
-                    // 両端のアスタリスクを取り除く
                     code = code.replace(/^\*|\*$/g, '');
 
                     document.getElementById('shiryobangou').value = code;
@@ -323,7 +328,6 @@
                     interactiveDiv.style.display = 'none';
                     scannerActive = false;
                     
-                    // 読み取り成功時の表示（必要に応じて資料番号を表示）
                     shomeiDisplay.style.display = 'block';
                     shomeiDisplay.textContent = "✨ 読取成功: " + code + " （送信時にマスタから書名が反映されます）";
                 }
