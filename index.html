@@ -149,8 +149,8 @@
 <body>
 
 <div class="container" id="main-container">
-    <h2><b>がんセンター新潟病院図書室</h2>
-    <p class="desc">📖バーコードを読み取って簡単貸出📱</b></p>
+    <h2><b>がんセンター新潟病院図書室</b></h2>
+    <p class="desc">📖バーコードを読み取って簡単貸出📱</p>
 
     <div id="form-view">
         <form id="checkout-form">
@@ -174,6 +174,10 @@
                 <div style="display: flex; gap: 8px;">
                     <input type="text" id="shiryobangou" required placeholder="例：10012345" style="flex: 1;">
                     <button type="button" id="scan-btn" style="width: auto; padding: 0 15px; font-size: 0.8rem; background-color: #0288d1;">📷カメラでスキャン</button>
+                </div>
+                <!-- ★書名表示エリア（背景白、緑の点線、フッター並みの小さめサイズ） -->
+                <div id="shomei-display" style="margin-top: 6px; padding: 6px 10px; background: #ffffff; border: 1px dashed #4caf50; border-radius: 6px; font-size: 0.75rem; color: #555; display: none;">
+                    書名：未取得
                 </div>
             </div>
 
@@ -201,7 +205,7 @@
 </div>
 
 <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbwMUaTvd3pmE4nox4hGcS3UpEBBqiuMmV2YjSBbC5lH5wmPH25eHB61FF9uuXo9ggqG/exec";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbyRS2xSD6g4bEo5FF0ZeY694szEzzj4z_mQC2PwO6Mb01F09teX1FP6R3UEMvltOLkFNg/exec";
 
     // 1. ローカルストレージから前回入力を復元
     window.addEventListener('DOMContentLoaded', () => {
@@ -257,6 +261,7 @@
     document.getElementById('next-btn').addEventListener('click', function() {
         document.getElementById('shiryobangou').value = "";
         document.getElementById('memo').value = "";
+        document.getElementById('shomei-display.style.display = 'none';"); // 念のため非表示化
         document.getElementById('success-view').classList.add('hidden');
         document.getElementById('form-view').classList.remove('hidden');
     });
@@ -265,9 +270,14 @@
     let scannerActive = false;
     document.getElementById('scan-btn').addEventListener('click', function() {
         const interactiveDiv = document.getElementById('interactive');
+        const shomeiDisplay = document.getElementById('shomei-display');
+        
         if (!scannerActive) {
             interactiveDiv.style.display = 'block';
             scannerActive = true;
+            shomeiDisplay.style.display = 'block';
+            shomeiDisplay.textContent = "📷 バーコードをスキャン中...";
+            
             Quagga.init({
                 inputStream : {
                     name : "Live",
@@ -296,6 +306,7 @@
                     alert("カメラを起動できませんでした。「許可する」を選択して再度おためしください。");
                     scannerActive = false;
                     interactiveDiv.style.display = 'none';
+                    shomeiDisplay.style.display = 'none';
                     return;
                 }
                 Quagga.start();
@@ -311,22 +322,27 @@
                     Quagga.stop();
                     interactiveDiv.style.display = 'none';
                     scannerActive = false;
+                    
+                    // 読み取り成功時の表示（必要に応じて資料番号を表示）
+                    shomeiDisplay.style.display = 'block';
+                    shomeiDisplay.textContent = "✨ 読取成功: " + code + " （送信時にマスタから書名が反映されます）";
                 }
             });
         } else {
             Quagga.stop();
             interactiveDiv.style.display = 'none';
             scannerActive = false;
+            shomeiDisplay.style.display = 'none';
         }
     });
 </script>
 
-</body>
-    <!-- 免責事項・フッター -->
+<!-- 免責事項・フッター -->
 <footer style="margin-top: 40px; padding: 20px 0; text-align: center; border-top: 1px solid #eaeaea;">
   <p style="font-size: 0.75rem; color: #8c8c8c; line-height: 1.5; margin: 0;">
     ※このフォームは、司書が業務効率化のため試験的に制作したツールであり、<br>
     病院の公式Webサイトおよび図書管理システムとは一切関係ありません。
   </p>
 </footer>
+</body>
 </html>
