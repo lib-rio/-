@@ -149,8 +149,8 @@
 <body>
 
 <div class="container" id="main-container">
-    <h2>がんセンター新潟病院図書室</h2>
-    <p class="desc">📖バーコードを読み取って簡単貸出📱</p>
+    <h2><b>がんセンター新潟病院図書室</h2>
+    <p class="desc">📖バーコードを読み取って簡単貸出📱</b></p>
 
     <div id="form-view">
         <form id="checkout-form">
@@ -180,12 +180,12 @@
             <!-- カメラ描画エリア ＆ 照準ガイド -->
             <div id="interactive" class="viewport">
                 <div class="scanner-guide"></div>
-                <div class="scanner-guide-text">この枠内にバーコードを合わせてください</div>
+                <div class="scanner-guide-text">枠の中にバーコードを合わせてください</div>
             </div>
 
             <div class="form-group">
                 <label for="memo">メモ（任意）</label>
-                <input type="text" id="memo" placeholder="特記事項があれば入力してください">
+                <input type="text" id="memo" placeholder="連絡事項があれば入力してください">
             </div>
 
             <button type="submit" id="submit-btn">借りる！</button>
@@ -195,7 +195,7 @@
     <!-- 完了画面 -->
     <div id="success-view" class="success-box hidden">
         <h3>✨借用を受け付けました✨</h3>
-        <p>入力されたメールアドレスに控えが送信されました。</p>
+        <p>入力したメールアドレスに控えが送信されました。</p>
         <button type="button" id="next-btn" class="secondary-btn">続けて借用する</button>
     </div>
 </div>
@@ -325,8 +325,8 @@
     <!-- 免責事項・フッター -->
 <footer style="margin-top: 40px; padding: 20px 0; text-align: center; border-top: 1px solid #eaeaea;">
   <p style="font-size: 0.75rem; color: #8c8c8c; line-height: 1.5; margin: 0;">
-    ※このフォームは、司書が業務効率化のために試験的に制作した補助ツールであり、<br>
-    　病院の公式Webサイトおよび正式な図書管理システムとは一切関係ありません。
+    ※このフォームは、司書が業務効率化のため試験的に制作したツールであり、<br>
+    病院の公式Webサイトおよび図書管理システムとは一切関係ありません。
   </p>
 </footer>
 </html>
