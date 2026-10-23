@@ -150,7 +150,7 @@
 
 <div class="container" id="main-container">
     <h2>がんセンター新潟病院図書室</h2>
-    <p class="desc">バーコードを読み取って簡単貸出📱</p>
+    <p class="desc">📖バーコードを読み取って簡単貸出📱</p>
 
     <div id="form-view">
         <form id="checkout-form">
@@ -170,7 +170,7 @@
             </div>
 
             <div class="form-group">
-                <label for="shiryobangou">資料番号（7桁のバーコード番号）</label>
+                <label for="shiryobangou">資料番号（8桁のバーコード番号）</label>
                 <div style="display: flex; gap: 8px;">
                     <input type="text" id="shiryobangou" required placeholder="例：10012345" style="flex: 1;">
                     <button type="button" id="scan-btn" style="width: auto; padding: 0 15px; font-size: 0.8rem; background-color: #0288d1;">📷カメラでスキャン</button>
@@ -322,4 +322,11 @@
 </script>
 
 </body>
+    <!-- 免責事項・フッター -->
+<footer style="margin-top: 40px; padding: 20px 0; text-align: center; border-top: 1px solid #eaeaea;">
+  <p style="font-size: 0.75rem; color: #8c8c8c; line-height: 1.5; margin: 0;">
+    ※このフォームは、司書が業務効率化のために試験的に制作した補助ツールであり、<br>
+    　病院の公式Webサイトおよび正式な図書管理システムとは一切関係ありません。
+  </p>
+</footer>
 </html>
