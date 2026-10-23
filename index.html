@@ -205,7 +205,7 @@
 </div>
 
 <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbyRS2xSD6g4bEo5FF0ZeY694szEzzj4z_mQC2PwO6Mb01F09teX1FP6R3UEMvltOLkFNg/exec";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxDj7DSBM9tz_gJogkw6r-TCBapvXKQUGdAhV2qX5PBECxp2h_XKZFoXsUHqJi58wdRWw/exec";
 
     // 1. ローカルストレージから前回入力を復元
     window.addEventListener('DOMContentLoaded', () => {
@@ -262,7 +262,6 @@
         document.getElementById('shiryobangou').value = "";
         document.getElementById('memo').value = "";
         
-        // ★修正済みの正しい非表示処理
         const shomeiDisplay = document.getElementById('shomei-display');
         if(shomeiDisplay) {
             shomeiDisplay.style.display = 'none';
@@ -309,7 +308,7 @@
             }, function(err) {
                 if (err) {
                     console.log(err);
-                    alert("カメラを起動できませんでした。「許可する」を選択して再度おためしください。");
+                    alert("カメラを起動できませんでした。スマートフォンの設定でカメラの使用「許可」を選択して再度おためしください。");
                     scannerActive = false;
                     interactiveDiv.style.display = 'none';
                     shomeiDisplay.style.display = 'none';
@@ -328,8 +327,22 @@
                     interactiveDiv.style.display = 'none';
                     scannerActive = false;
                     
+                    // 読み取り成功後、GAS（ doGet ）に問い合わせて書名を取得・表示
                     shomeiDisplay.style.display = 'block';
-                    shomeiDisplay.textContent = "✨ 読取成功: " + code + " （送信時にマスタから書名が反映されます）";
+                    shomeiDisplay.textContent = "🔍 書名を検索中...";
+
+                    fetch(GAS_URL + "?shiryobangou=" + encodeURIComponent(code))
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === "success") {
+                                shomeiDisplay.textContent = "📖 " + data.shomei;
+                            } else {
+                                shomeiDisplay.textContent = "📖 書名：マスタ未登録（コード: " + code + "）";
+                            }
+                        })
+                        .catch(error => {
+                            shomeiDisplay.textContent = "✨ 読み取りに成功しました: " + code + " （送信時に記録されます）";
+                        });
                 }
             });
         } else {
